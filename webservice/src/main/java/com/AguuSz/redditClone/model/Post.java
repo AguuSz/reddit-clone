@@ -24,7 +24,7 @@ public class Post {
     @GeneratedValue(strategy = IDENTITY)
     private Long postId;
 
-    // Este campo no puede ser nulo, en caso de serlo, arrojara un mensaje diciendo lo siguiente...
+    // Este campo no pued   e ser nulo, en caso de serlo, arrojara un mensaje diciendo lo siguiente...
     @NotBlank(message = "Post name cannot be empty or Null")
     private String postName;
 
@@ -34,11 +34,13 @@ public class Post {
     @Nullable
     @Lob
     private String description;
+
     private Integer voteCount = 0;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
+
     private Instant createdDate;
 
     @ManyToOne(fetch = LAZY)
