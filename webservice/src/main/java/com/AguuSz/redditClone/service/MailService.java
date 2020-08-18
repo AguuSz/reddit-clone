@@ -30,10 +30,10 @@ class MailService {
         };
         try {
             mailSender.send(messagePreparator);
-            log.info("Activation email sent!!");
+            log.info("Se envio la activacion por correo!");
         } catch (MailException e) {
-            log.error("Exception occurred when sending mail", e);
-            throw new SpringRedditException("Exception occurred when sending mail to " + notificationEmail.getRecipient(), e);
+            log.error("Ha habido un error durante el proceso de envio de correo.", e);
+            throw new SpringRedditException("Hubo un problema al enviar el correo a: " + notificationEmail.getRecipient(), e);
         }
     }
 
