@@ -1,5 +1,7 @@
 package com.AguuSz.redditClone.service;
 
+import com.AguuSz.redditClone.dto.AuthenticationResponse;
+import com.AguuSz.redditClone.dto.LoginRequest;
 import com.AguuSz.redditClone.dto.RegisterRequest;
 import com.AguuSz.redditClone.exceptions.SpringRedditException;
 import com.AguuSz.redditClone.model.NotificationEmail;
@@ -7,7 +9,12 @@ import com.AguuSz.redditClone.model.User;
 import com.AguuSz.redditClone.model.VerificationToken;
 import com.AguuSz.redditClone.repository.UserRepository;
 import com.AguuSz.redditClone.repository.VerificationTokenRepository;
+import com.AguuSz.redditClone.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +31,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void signUp(RegisterRequest registerRequest) {
@@ -43,6 +52,7 @@ public class AuthService {
                         "please click on the below url to activate your account: " +
                         "http://localhost:8080/api/auth/accountVerification/" + token
                 ));
+        
     }
 
     private String generateVerificationToken(User user) {
@@ -67,5 +77,17 @@ public class AuthService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new SpringRedditException(("User not found with name - " + username)));
         user.setEnabled(true);
         userRepository.save(user);
+    }
+
+    public AuthenticationResponse login(LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(),
+                        loginRequest.getPassword()
+                )
+        );
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String token = jwtProvider.generateToken(authenticate);
+        return new AuthenticationResponse(token, loginRequest.getUsername());
     }
 }
